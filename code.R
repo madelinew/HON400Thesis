@@ -1,4 +1,4 @@
-#MADELINE M. WARNDORF HON400 THESIS 2017
+#MADELINE M. WARNDORF HON400 THESIS 2018
 #IMPORT DATA:
 # USE importData.R file
 #
@@ -33,10 +33,10 @@ fatal_YYsetup <- function(df, YYYY) {
   y = YYYY
   if (y >= 2007 & y <= 2009) {
     fataldf <- as.data.frame(cbind.data.frame(df$icasenum, df$istatenum, df$icity, df$icounty,
-                                   df$latitude, df$longitude, df$ivnumber, df$vfatcount,
-                                   df$iaccday, df$iaccmon, df$iaccyr, df$saccdate, 
-                                   df$imodelyr, df$imake, df$idrf1, df$idrf2, 
-                                   df$idrf3, df$idrf4), header = TRUE, as.is = TRUE)
+                                              df$latitude, df$longitude, df$ivnumber, df$vfatcount,
+                                              df$iaccday, df$iaccmon, df$iaccyr, df$saccdate, 
+                                              df$imodelyr, df$imake, df$idrf1, df$idrf2, 
+                                              df$idrf3, df$idrf4), header = TRUE, as.is = TRUE)
     colnames(fataldf) <- c("casenum", "statenum", "citynum","countynum","lat","long",
                            "vehnum", "numfatalveh", "day", "month", "year","date", "modelyr", "make",
                            "drf1", "drf2", "drf3", "drf4")
@@ -50,12 +50,12 @@ fatal_YYsetup <- function(df, YYYY) {
     fataldf$lat <- as.character(fataldf$lat)
     fataldf$long <- as.character(fataldf$long) 
     fataldf <- unique(fataldf)
-    }
+  }
   else {
     fataldf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum, df$city, df$county, df$latitude,
-                                   df$longitude, df$vnumber, df$vfatcount, df$accday, df$accmon,
-                                   df$caseyear,df$accdate, df$modelyr, df$make, 
-                                   df$dridistract1, df$dridistract2), 
+                                              df$longitude, df$vnumber, df$vfatcount, df$accday, df$accmon,
+                                              df$caseyear,df$accdate, df$modelyr, df$make, 
+                                              df$dridistract1, df$dridistract2), 
                              header = TRUE, as.is = TRUE, stringsAsFactor=FALSE)
     colnames(fataldf) <- c("casenum", "statenum", "citynum", "countynum", "lat", "long",
                            "vehnum", "numfatalveh", "day", "month", 
@@ -70,7 +70,7 @@ fatal_YYsetup <- function(df, YYYY) {
     fataldf$lat <- as.character(fataldf$lat)
     fataldf$long <- as.character(fataldf$long)
     fataldf <- unique(fataldf)
-    }
+  }
   return(fataldf)
 }
 
@@ -142,8 +142,8 @@ findingCellCases <- function(df, YY) {
                                                                     ifelse(ndf$drf4 == 94, 94, 0)))))))) 
         #93 = cellular telephone present in vehicle
         #94 = cellular telephone in use in vehicle
-        ndf <- ndf[ndf$drf != 0, ]
-        drop <- c("drf1", "drf2", "drf3", "drf4")
+        
+        drop <- c("citynum","countynum","lat","long","day","month","date","drf1", "drf2", "drf3", "drf4")
         ndf = ndf[,!(names(ndf) %in% drop)]
         return(ndf)
       }
@@ -163,8 +163,7 @@ findingCellCases <- function(df, YY) {
         #5 = Talking or listening to cell phone
         #6 = While dialing Cell phone
         #15 = Other cell phone distraction
-        df <- df[df$drf != 0, ]
-        drop <- c("dridistract1", "dridistract2")
+        drop <- c("citynum","countynum","lat","long","day","month","date","dridistract1", "dridistract2")
         df = df[,!(names(df) %in% drop)]
         return(df)
       }
@@ -176,236 +175,305 @@ findingCellCases <- function(df, YY) {
   return(fataldisYY)
 }
 
-drf_07 <- findingCellCases(fatal_07, 07)
-drf_08 <- findingCellCases(fatal_08, 08)
-drf_09 <- findingCellCases(fatal_09, 09)
-drf_10 <- findingCellCases(fatal_10, 10)
-drf_11 <- findingCellCases(fatal_11, 11)
-drf_12 <- findingCellCases(fatal_12, 12)
-drf_13 <- findingCellCases(fatal_13, 13)
-drf_14 <- findingCellCases(fatal_14, 14)
-drf_15 <- findingCellCases(fatal_15, 15)
 
+tableToCSV(combinedMYdf)
+
+fatal_07 <- findingCellCases(fatal_07, 07)
+fatal_08 <- findingCellCases(fatal_08, 08)
+fatal_09 <- findingCellCases(fatal_09, 09)
+fatal_10 <- findingCellCases(fatal_10, 10)
+fatal_11 <- findingCellCases(fatal_11, 11)
+fatal_12 <- findingCellCases(fatal_12, 12)
+fatal_13 <- findingCellCases(fatal_13, 13)
+fatal_14 <- findingCellCases(fatal_14, 14)
+fatal_15 <- findingCellCases(fatal_15, 15)
 # FINDING NUM OF CASES and NUM OF DISTRACTED ------------------------------
-#counting total number of cases in the calendar year by case
-#INPUT: df = fatal_YY
-#OUTPUT: number of total cases 
-countOfCases <- function(df) {
+#counting total number of cases in the calendar year by model year
+#INPUT: df = fatal_YY 
+#OUTPUT: data frame of number of total cases by model year
+countOfCasesByMY <- function(df) {
   #df = fatal_YY
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum")
-  casedf <- unique(casedf)
-  casedf <- makingUniqueCases(casedf)
-  #for storing the total number of cases that were fatal
-  casetotalsum <- 0
-  x <- count(casedf)
-  casetotalsum <- sum(x$freq)
-  return(casetotalsum)
+  dfs <- df
+  modelyearList <- unique(dfs$modelyr)
+  modelYear = numeric()
+  totalCases = numeric()
+  listcount <- 1
+  for(i in modelyearList){
+    modelYear[listcount] <- i
+    addingToTable <- function(i){
+      dfn <- dfs
+      dfn$modelyrP <- ifelse(df$modelyr == i, 1, 0)
+      dfn <- dfn[dfn$modelyrP != 0, ]
+      dft <- as.data.frame(cbind.data.frame(dfn$casenum, dfn$statenum), 
+                           header = TRUE, as.is = TRUE)
+      colnames(dft) <- c("casenum", "statenum")
+      dft <- unique(dft)
+      dft <- makingUniqueCases(dft)
+      casetotalsum <- 0
+      x <- count(dft)
+      casetotalsum <- sum(x$freq)
+      return(casetotalsum)
+    }
+    totalCases[listcount] <- addingToTable(i)
+    listcount = listcount + 1
+  }
+  dfmy <- data.frame(modelYear,totalCases, stringsAsFactors = FALSE)
+  return(dfmy)
 }
 
 #Function for counting distracted driving cases
-#INPUT: df = fatal_YY YY = YY
-#OUTPUT: number of distracted driving cases by vehicle involving cellphones 
-countOfDisCases <- function(df, YY) {
-  fataldisYY <- findingCellCases(df, YY)
-  #df is the new dataframe
-  df <- fataldisYY
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum")
-  casedf <- unique(casedf)
-  #for storing the total number of cases that were fatal
-  casedissum <- 0
-  x <- count(casedf)
-  casedissum <- sum(x$freq)
-  return(casedissum)
+#INPUT: df = fatal_YY 
+#OUTPUT: data frame of number of distracted driving cases involving cellphones by model year
+countOfDisCasesByMY <- function(df) {
+  #df = fatal_YY
+  fataldisYY <- df[df$drf != 0, ]
+  #dfn is the new dataframe
+  dfn <- fataldisYY
+  modelyearList <- unique(dfn$modelyr)
+  modelYear = numeric()
+  modelYearCellPhone = numeric()
+  listcount <- 1
+  for(i in modelyearList){
+    modelYear[listcount] <- i
+    addingToTable <- function(i){
+      dfs <- dfn
+      dfs$modelyrP <- ifelse(dfn$modelyr == i, 1, 0)
+      dfs <- dfs[dfs$modelyrP != 0, ]
+      dft <- as.data.frame(cbind.data.frame(dfs$casenum, dfs$statenum), 
+                           header = TRUE, as.is = TRUE)
+      colnames(dft) <- c("casenum", "statenum")
+      dft <- unique(dft)
+      dft <- makingUniqueCases(dft)
+      casetotalsum <- 0
+      x <- count(dft)
+      casetotalsum <- sum(x$freq)
+      return(casetotalsum)
+    }
+    modelYearCellPhone[listcount] <- addingToTable(i)
+    listcount = listcount + 1
+  }
+  dfmy <- data.frame(modelYear,modelYearCellPhone, stringsAsFactors = FALSE)
+  return(dfmy)
 }
-
 
 # NHTSA TECHNOLOGY --------------------------------------------------------
 
 #Function for counting number of cases with fatalitites in the car
 #INPUT: df = fatal_YY
-#OUTPUT: number of cases with fatalities in the car
-countingFatalInCars <- function(df) {
+#OUTPUT: number of cases with fatalities in the car by model year
+countOfFatalInCarByMY <- function(df) {
   #df = fatal_YY
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum, df$numfatalveh), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum","numfatalveh")
-  casedf <- casedf[casedf$numfatalveh != 0,]
-  casedf <- unique(casedf)
-  newcasedf <- makingUniqueCases(casedf)
-  casetotalsum <- 0
-  x <- count(casedf)
-  casetotalsum <- sum(x$freq)
-  return(casetotalsum)
+  #dfn is the new dataframe
+  dfn <- df[df$numfatalveh != 0,]
+  modelyearList <- unique(df$modelyr)
+  modelYear = numeric()
+  modelYearFatalVeh = numeric()
+  listcount <- 1
+  for(i in modelyearList){
+    modelYear[listcount] <- i
+    addingToTable <- function(i){
+      dfs <- dfn
+      dfs$modelyrP <- ifelse(dfn$modelyr == i, 1, 0)
+      dfs <- dfs[dfs$modelyrP != 0, ]
+      
+      dft <- as.data.frame(cbind.data.frame(dfs$casenum, dfs$statenum), 
+                           header = TRUE, as.is = TRUE)
+      colnames(dft) <- c("casenum", "statenum")
+      
+      dft <- makingUniqueCases(dft)
+      casetotalsum <- 0
+      x <- count(dft)
+      casetotalsum <- sum(x$freq)
+      return(casetotalsum)
+    }
+    modelYearFatalVeh[listcount] <- addingToTable(i)
+    listcount = listcount + 1
+  }
+  dfmy <- data.frame(modelYear,modelYearFatalVeh, stringsAsFactors = FALSE)
+  return(dfmy)
 }
+
 
 #Function for creating data frame FatalCases (FC) o.f. TotalCases (TC) with Distracted Cases o.f. TC
-#INPUT: df = fatal_YY
-#OUTPUT: data frame with year, numFC, numDC, numTC, FCofTC <- as %, DCofTC <- as %
-makingNHTSAdf <- function(df, YY){
-  #df = fatal_YY
-  #YY = YY
-  #FC = fatal cases
-  #TC = total cases
-  year <- unique(df$year)
-  FCvsCP <- as.data.frame(year)
-  colnames(FCvsCP) <- "caseyear"
-  fatalcases <- countingFatalInCars(df)
-  FCvsCP$numFC <- fatalcases
-  numdistract <- countOfDisCases(df, YY)
-  FCvsCP$numCP <- numdistract
-  totalcases <- countOfCases(df)
-  FCvsCP$numTC <- totalcases
-  FCvsCP$FCofTC <- round(((fatalcases/totalcases) * 100), digits = 4)
-  FCvsCP$CPofTC <- round(((numdistract/totalcases)*100), digits = 4)
-  return(FCvsCP)
+#INPUT: none
+#OUTPUT: data frame with modelyr, numFatalVeh, numCellPhone, numTotalCases
+makingNHTSAdf <- function(){
+  
+  #fatalities in vehicle cases combined data frame
+  combinedFatalVehdf <- function(){
+    df07 <- countOfFatalInCarByMY(fatal_07)
+    df08 <- countOfFatalInCarByMY(fatal_08)
+    df09 <- countOfFatalInCarByMY(fatal_09)
+    df10 <- countOfFatalInCarByMY(fatal_10)
+    df11 <- countOfFatalInCarByMY(fatal_11)
+    df12 <- countOfFatalInCarByMY(fatal_12)
+    df13 <- countOfFatalInCarByMY(fatal_13)
+    df14 <- countOfFatalInCarByMY(fatal_14)
+    df15 <- countOfFatalInCarByMY(fatal_15)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
+  }
+  numFatalVehdf <- combinedFatalVehdf()
+  #print(numFatalVehdf)
+  modelyear <- sort(unique(numFatalVehdf$modelYear))
+  fatalVehTotal <- as.vector(tapply(numFatalVehdf$modelYearFatalVeh, numFatalVehdf$modelYear, sum))
+  casedf <- data.frame(list(modelYear = modelyear, fatalVehTotal = fatalVehTotal), stringsAsFactors = FALSE)
+  casedf$fatalVehTotal <- as.integer(casedf$fatalVehTotal)
+  
+  
+  #cell phone cases combined data frame
+  combinedCellPhonedf <- function(){
+    df07 <- countOfDisCasesByMY(fatal_07, 07)
+    df08 <- countOfDisCasesByMY(fatal_08, 08)
+    df09 <- countOfDisCasesByMY(fatal_09, 09)
+    df10 <- countOfDisCasesByMY(fatal_10, 10)
+    df11 <- countOfDisCasesByMY(fatal_11, 11)
+    df12 <- countOfDisCasesByMY(fatal_12, 12)
+    df13 <- countOfDisCasesByMY(fatal_13, 13)
+    df14 <- countOfDisCasesByMY(fatal_14, 14)
+    df15 <- countOfDisCasesByMY(fatal_15, 15)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
+  }
+  #adding cell phone data frame into main combined data frame
+  numCellPhonedf <- combinedCellPhonedf()
+  #print(numCellPhonedf)
+  modelyear <- sort(unique(numCellPhonedf$modelYear))
+  cellPhoneTotal <- as.vector(tapply(numCellPhonedf$modelYearCellPhone, numCellPhonedf$modelYear, sum))
+  CPcasedf <- data.frame(list(modelYear = modelyear, cellPhoneTotal = cellPhoneTotal), stringsAsFactors = FALSE)
+  casedf$cellPhoneTotal <- as.integer(CPcasedf$cellPhoneTotal)
+  
+  #total cases combined data frame
+  combinedTotalCasesdf <- function(){
+    df07 <- countOfCasesByMY(fatal_07)
+    df08 <- countOfCasesByMY(fatal_08)
+    df09 <- countOfCasesByMY(fatal_09)
+    df10 <- countOfCasesByMY(fatal_10)
+    df11 <- countOfCasesByMY(fatal_11)
+    df12 <- countOfCasesByMY(fatal_12)
+    df13 <- countOfCasesByMY(fatal_13)
+    df14 <- countOfCasesByMY(fatal_14)
+    df15 <- countOfCasesByMY(fatal_15)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
+  }
+  #combining into main data frame
+  numTotalCasesdf <- combinedTotalCasesdf()
+  #print(numTotalCasesdf)
+  modelyear <- sort(unique(numTotalCasesdf$modelYear))
+  TotalCasesMY <- as.vector(tapply(numTotalCasesdf$totalCases, numTotalCasesdf$modelYear, sum))
+  
+  TCcasedf <- data.frame(list(modelYear = modelyear, totalCases = TotalCasesMY), stringsAsFactors = FALSE)
+  casedf$totalCases <- as.integer(TCcasedf$totalCases)
+  
+  #fatal in vehicle divided by total cases (%)
+  FatalVehofTotalCases <- round(((casedf$fatalVehTotal/casedf$totalCases)*100),digits = 4)
+  casedf$FatalVehofTotalCases <- FatalVehofTotalCases
+  # cell phone divided by total cases (%)
+  CellPhoneofTotalCases <- round(((casedf$cellPhoneTotal/casedf$totalCases)*100), digits = 4)
+  casedf$CellPhoneofTotalCases <- CellPhoneofTotalCases
+  
+  techPhase <- c("ESC", "ESC", "ESC","ESC","EM","EM","EM","EM","EM")
+  
+  ndf <- as.data.frame(cbind(casedf$modelYear, casedf$fatalVehTotal,casedf$cellPhoneTotal,
+                             casedf$totalCases,casedf$FatalVehofTotalCases,casedf$CellPhoneofTotalCases,
+                             techPhase), header = TRUE, as.is = TRUE, stringsAsFactors = FALSE)
+  colnames(ndf) <- c("modelYear", "fatalVehTotal", "cellPhoneTotal", "totalCases",
+                     "FatalVehofTotalCases","CellPhoneofTotalCases","techPhase")
+  ndf$modelYear <- casedf$modelYear 
+  ndf$fatalVehTotal <- casedf$fatalVehTotal
+  ndf$cellPhoneTotal <- casedf$cellPhoneTotal
+  ndf$totalCases <- casedf$totalCases
+  ndf$FatalVehofTotalCases <- casedf$FatalVehofTotalCases
+  ndf$CellPhoneofTotalCases <- casedf$CellPhoneofTotalCases
+  return(ndf)
 }
 
-#making combined data frame to pull into table
-combinedFC_vs_CP <- function(){
-  df07 <- makingNHTSAdf(fatal_07, 07)
-  df07$technology <- "ESC"
-  df08 <- makingNHTSAdf(fatal_08, 08)
-  df08$technology <- "ESC"
-  df09 <- makingNHTSAdf(fatal_09, 09)
-  df09$technology <- "ESC"
-  df10 <- makingNHTSAdf(fatal_10, 10)
-  df10$technology <- "ESC"
-  df11 <- makingNHTSAdf(fatal_11, 11)
-  df11$technology <- "ESC"
-  df12 <- makingNHTSAdf(fatal_12, 12)
-  df12$technology <- "EM"
-  df13 <- makingNHTSAdf(fatal_13, 13)
-  df13$technology <- "EM"
-  df14 <- makingNHTSAdf(fatal_14, 14)
-  df14$technology <- "EM"
-  df15 <- makingNHTSAdf(fatal_15, 15)
-  df15$technology <- "EM"
-  #combining into one df
-  combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
-                      df14, df15)
-  return(combineddf)
-}
-combinedFC_vs_CP <- combinedFC_vs_CP()
+combinedMYdf <- makingNHTSAdf()
 
-#Table CSV combinedFC_vs_DC To Paste into .txt File to Paste into Word for Table
-#Function for making and saving combinedFC_vs_DC Table 
-#INPUT: df = combinedFC_vs_DC
+#Table CSV combinedMYdf To Paste into .txt File to Paste into Word for Table
+#Function for making and saving combinedMYdf Table 
+#INPUT: df = combinedMYdf
 #OUTPUT: saved .CSV file of table
 tableToCSV <- function(df) {
-  #df = combinedFC_vs_DC
+  #df = combinedMYdf
   row.names(df)<- NULL
-  colnames(df) <- c("caseYear","numFatalCase(FC)","numCellPhone(CP)","numTotalCase(TC)", 
-                    "FCofTC","CPofTC","TechnologyPhase")
-  write.csv(df, file = "combinedFatalvsDistractTable.csv")
+  colnames(df) <- c("modelYear", "fatalVehTotal", "cellPhoneTotal", "totalCases",
+                    "FatalVehofTotalCases","CellPhoneofTotalCases","techPhase")
+  write.csv(df, file = "combinedMY.csv")
 }
-tableToCSV(combinedFC_vs_CP)
+tableToCSV(combinedMYdf)
 
-#Plot
-NHTSAFCplot <- function() {
-  #df = combinedFC_vs_CP
-  mydata <- read.table("fcdc.txt",header = TRUE,stringsAsFactors = FALSE)
-  par(mfrow=c(1,1))
-  x = mydata$caseYear
-  xmin = min(mydata$caseYear)
-  xmax = max(mydata$caseYear)
-  ymin2 = min(mydata$FCofTC) - 0.5
-  ymax2 = max(mydata$FCofTC) + 0.5
-  y2 = mydata$FCofTC
-  plot(x,y2, type = "o", main = "Cases with Fatalities in Vehicle (%)", xlab = "Case Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
-       ylim = c(ymin2, ymax2))
-}
-NHTSAFCplot()
-
-NHTSACPplot <- function(){
-  mydata <- read.table("fcdc.txt",header = TRUE,stringsAsFactors = FALSE)
-  x = mydata$caseYear
-  y1 = mydata$CPofTC
-  xmin = min(mydata$caseYear)
-  xmax = max(mydata$caseYear)
-  ymin1 = min(mydata$CPofTC) - 0.10
-  ymax1 = max(mydata$CPofTC) + 0.10
-  plot(x,y1, type = "o", main = "Cases with Cell Phone Usage (%)", xlab = "Case Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
-}
-NHTSACPplot()
-
-NHTSAplot <- function(){
-  mydata <- read.table("fcdc.txt",header = TRUE,stringsAsFactors = FALSE)
-  par(mfrow = c(2,1))
-  x = mydata$caseYear
-  y1 = mydata$CPofTC
-  xmin = min(mydata$caseYear)
-  xmax = max(mydata$caseYear)
-  ymin1 = min(mydata$CPofTC) - 0.10
-  ymax1 = max(mydata$CPofTC) + 0.10
+#NHTSA PLOT MY
+NHTSAplot <- function() {
+  #df = combinedMYdf
+  mydata <- combinedMYdf
+  par(mfrow=c(2,1))
+  x = mydata$modelYear
+  xmin = min(mydata$modelYear)
+  xmax = max(mydata$modelYear)
   
-  y2 = mydata$FCofTC
-  ymin2 = min(mydata$FCofTC) - 0.5
-  ymax2 = max(mydata$FCofTC) + 0.5
+  y1 = mydata$CellPhoneofTotalCases
+  ymin1 = min(mydata$CellPhoneofTotalCases) - 0.2
+  ymax1 = max(mydata$CellPhoneofTotalCases) + 0.1
   
-  plot(x,y1, type = "o", main = "Cases with Cell Phone Usage (%)", xlab = "Case Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
-
-  plot(y1,y2,main = "Cases with Cell Phone Usage (%) vs. Fatalities in Vehicle Cases (%)", xlab = "Cell Phone Cases (%)",
-       ylab ="Fatalities in Vehicle Cases(%)", xlim = c(ymin1,ymax1),
-       ylim = c(ymin2, ymax2))
-  abline(lm(y2~y1),col="red")
-  lines(lowess(y1,y2),col="blue")
+  ymin2 = min(mydata$FatalVehofTotalCases)-0.5
+  ymax2 = max(mydata$FatalVehofTotalCases)+1
+  y2 = mydata$FatalVehofTotalCases
+  
+  plot(x,y2, main = "A) Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+       ylim = c(ymin2, ymax2), col = "mediumblue")
+  lines(x, y2, type = "h", col = "mediumblue")
+  
+  plot(x,y1, main = "B) Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+       ylim = c(ymin1, ymax1), col = "darkviolet")
+  lines(x, y1, type = "h", col = "darkviolet")
+  
 }
 NHTSAplot()
 
-mydata2 <- read.table("fcdcraw.txt",header = TRUE,stringsAsFactors = FALSE)
-lm(mydata2)
-#Intercept -8.1896 FCofTC 0.2025
-asex <- lm(mydata2)
-summary(asex)
-sd(mydata2$CPofTC)
-sd(mydata2$FCofTC)
-
-#FOR CREATING SINGLE DF OF CASE YEAR, CASE DISTRACT TOTAL, CASE TOTAL
-#This function is for creating df by years
-creatingCaseTotaldf1 <- function(df, YY) { 
-  #df = fatal_YY
-  #YY = case year
-  year <- unique(df$year)
-  casedf <- as.data.frame(year)
-  #sum of distracted driving cases
-  numdistract <- countOfDisCases(df, YY)
-  casedf$numdistract <- numdistract
-  #sum of total fatal cases for the year
-  numtotalcases <- countOfCases(df)
-  casedf$numtotalcases <- numtotalcases
-  #distracted divided by total case
-  CPofTC <- (numdistract/numtotalcases)*100
-  casedf$CPofTC <- CPofTC
-  return(casedf)
-}
-
-
-
-#FOR CREATING COMBINED DISTRACTED VS. TOTAL CASES DF
-creatingCombinedCaseTotaldf <- function(){
-  df07 <- creatingCaseTotaldf1(fatal_07, 07)
-  df08 <- creatingCaseTotaldf1(fatal_08, 08)
-  df09 <- creatingCaseTotaldf1(fatal_09, 09)
-  df10 <- creatingCaseTotaldf1(fatal_10, 10)
-  df11 <- creatingCaseTotaldf1(fatal_11, 11)
-  df12 <- creatingCaseTotaldf1(fatal_12, 12)
-  df13 <- creatingCaseTotaldf1(fatal_13, 13)
-  df14 <- creatingCaseTotaldf1(fatal_14, 14)
-  df15 <- creatingCaseTotaldf1(fatal_15, 15)
+#TECHNOLOGY T-TEST
+technologyTtest <- function(df){
+  #df = combinedMYdf
+  before11 <- subset(df, modelYear < 2011, select = FatalVehofTotalCases)
   
-  #combining into one df
-  combineddf <- rbind(df07, df08, df09, df10, df11, df12, df13, 
-                      df14, df15)
-  return(combineddf)
+  after11 <- subset(df, modelYear > 2011, select = FatalVehofTotalCases)
+  print(sd(before11$FatalVehofTotalCases))
+  print(sd(after11$FatalVehofTotalCases))
+  ttest <- t.test(before11,after11)
+  return(ttest)
 }
-combinedCP_vs_TC <- creatingCombinedCaseTotaldf()
+technologyTtest(combinedMYdf)
 
+#CELL PHONE T-TEST
+cellphoneTtest <- function(df, MY){
+  #df = combinedMYdf
+  #MY = model year break. either 2010 or 2014
+  if(MY == 2010){
+    before10 <- subset(df, modelYear < 2010, select = CellPhoneofTotalCases)
+    
+    after10 <- subset(df, modelYear > 2010, select = CellPhoneofTotalCases)
+    print(sd(before10$CellPhoneofTotalCases))
+    print(sd(after10$CellPhoneofTotalCases))
+    ttest <- t.test(before10,after10)
+  } else {
+    before14 <- subset(df, modelYear < 2014, select = CellPhoneofTotalCases)
+    
+    after14 <- subset(df, modelYear > 2014, select = CellPhoneofTotalCases)
+    print(sd(before14$CellPhoneofTotalCases))
+    print(sd(after14$CellPhoneofTotalCases))
+    ttest <- t.test(before14,after14)
+  }
+  return(ttest)
+}
+cellphoneTtest(combinedMYdf,2010)
+cellphoneTtest(combinedMYdf,2014)
 
 
 # MAKES ANALYSIS -----------------------------------------------------------
@@ -425,336 +493,31 @@ creatingMakestable <- function(){
   return(makestable)
 }
 
-#CP vs. TC by MAKE
-countOfCasesMake <- function(df, makenum) {
+#Count of Total Cases for each Make by Model Year
+#INPUT: df = fatal_YY makenum = Make number
+#OUTPUT: data frame with count of cases by model year
+countOfCasesMakeByMY <- function(df, makenum) {
   #df = fatal_YY
+  #makenum = make number
+  modelyearList <- unique(df$modelyr)
   mn <- makenum
-  df$makenump <- ifelse(df$make == mn, 1, 0)
-  df <- df[df$makenump != 0, ]
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum, df$make), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum", "make")
-  casedf <- unique(casedf)
-  #for storing the total number of cases that were fatal
-  casetotalsum <- 0
-  x <- count(casedf)
-  casetotalsum <- sum(x$freq)
-  return(casetotalsum)
-}
-
-countOfDisCasesMake <- function(df, YY, makenum) {
-  mn <- makenum
-  fataldisYY <- findingCellCases(df, YY)
-  #df is the new dataframe
-  df <- fataldisYY
-  df$makenump <- ifelse(df$make == mn, 1, 0)
-  df <- df[df$makenump != 0, ]
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum, df$make), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum", "make")
-  casedf <- unique(casedf)
-  #for storing the total number of cases that were fatal
-  casedissum <- 0
-  x <- count(casedf)
-  casedissum <- sum(x$freq)
-  return(casedissum)
-}
-
-countingFatalMakeInCars <- function(df, makenum) {
-  #df = fatal_YY
-  mn <- makenum
-  df$makenump <- ifelse(df$make == mn, 1, 0)
-  df <- df[df$makenump != 0, ]
-  casedf <- as.data.frame(cbind.data.frame(df$casenum, df$statenum, df$numfatalveh), 
-                          header = TRUE, as.is = TRUE)
-  colnames(casedf) <- c("casenum", "statenum","numfatalveh")
-  casedf <- casedf[casedf$numfatalveh != 0,]
-  casedf <- unique(casedf)
-  casetotalsum <- 0
-  x <- count(casedf)
-  casetotalsum <- sum(x$freq)
-  return(casetotalsum)
-}
-
-creatingMakeCaseTotaldf <- function(df, YY, makenum) {
-  #df = fatal_YY
-  #YY = year
-  #makenum = FARS make code number
-  df1 <- df
-  numMakeTC <- countOfCasesMake(df1, makenum)
-  numMakeCP <- countOfDisCasesMake(df1, YY, makenum)
-  numMakeFC <- countingFatalMakeInCars(df1,makenum)
-  year <- unique(df1$year)
-  casedf <- as.data.frame(year)
-  #sum of fatal driving cases
-  casedf$numMakeFC <- numMakeFC
-  numFCTot <- countingFatalInCars(df1)
-  casedf$numFCTotal <- numFCTot
-  #sum of distracted driving cases
-  casedf$numMakeCP <- numMakeCP
-  numDistTot <- countOfDisCases(df1, YY)
-  casedf$numCPTotal <- numDistTot
-
-  #sum of total fatal cases for the year
-  casedf$numMakeTC <- numMakeTC
-  numTotalCase <- countOfCases(df1)
-  casedf$numTotalCase <- numTotalCase
-  # make distracted divided by make total cases (%)
-  #MakeCPofMakeTC <- round(((numMakeCP/numMakeTC)*100), digits = 4)
-  #if(MakeCPofMakeTC == "NaN"){
-  #  MakeCPofMakeTC <- 0
-  #}
-  #casedf$MakeCPofMakeTC <- MakeCPofMakeTC
-  
-  #make fatal divided by total fatal (%)
-  MakeFCofTC <- round(((numMakeFC/numTotalCase)*100),digits = 4)
-  casedf$MakeFCofTC <- MakeFCofTC
-  # make distracted divided by total distracted (%)
-  MakeCPofTC <- round(((numMakeCP/numTotalCase)*100), digits = 4)
-  casedf$MakeCPofTC <- MakeCPofTC
-  
-
-
-  # make total divided by total cases (%)
-  MakeTCofTC <- round(((numMakeTC/numTotalCase)*100), digits = 4)
-  casedf$MakeTCofTC <- MakeTCofTC
-  
-  return(casedf)
-}
-  
-#Dataframe of Make
-#VARIABLES
-# year (calendar year), makedistract, totaldistract, maketotal, totalcases, makeDofDisC (make distract of 
-# total distract), makeTCofTC (make total cases out of total cases)
-makedistractdf <- function(makenum) {
-  m <- makenum
-  df07 <- creatingMakeCaseTotaldf(fatal_07, 07, m)
-  df08 <- creatingMakeCaseTotaldf(fatal_08, 08, m)
-  df09 <- creatingMakeCaseTotaldf(fatal_09, 09, m)
-  df10 <- creatingMakeCaseTotaldf(fatal_10, 10, m)
-  df11 <- creatingMakeCaseTotaldf(fatal_11, 11, m)
-  df12 <- creatingMakeCaseTotaldf(fatal_12, 12, m)
-  df13 <- creatingMakeCaseTotaldf(fatal_13, 13, m)
-  df14 <- creatingMakeCaseTotaldf(fatal_14, 14, m)
-  df15 <- creatingMakeCaseTotaldf(fatal_15, 15, m)
-  
-  makedf <- rbind(df07, df08, df09, df10, df11, df12, df13, 
-                  df14, df15)
-  return(makedf)
-}
-#for Ford (FARS Code 12)
-fordCPdf <- makedistractdf(12)
-
-#for Cadillac (FARS Code 19)
-cadillacCPdf <- makedistractdf(19)
-
-#for Mercedes-Benz (FARS Code 42)
-mercedesCPdf <- makedistractdf(42)
-
-#for Volvo (FARS Code 51)
-volvoCPdf <- makedistractdf(51)
-
-#Table CSV makeCPdf To Paste into .txt File to Paste into Word for Table
-#Function for making and saving makedisdf Table 
-#INPUT: df = makeCPdf
-#OUTPUT: saved .CSV file of table
-tableToMakeCSV <- function(df) {
-  #df = makeCPdf
-  row.names(df)<- NULL
-  colnames(df) <- c("caseYear","numMakeFatalCase(FC)","numFCTotal","numMakeCellPhone(CP)",
-                    "numCPTotal","numMakeTotalCase(TC)", 
-                    "numTCTotal","MakeFCofTC","MakeCPofTC","MakeTCofTC")
-  write.csv(df, file = "makevolvo.csv")
-}
-tableToMakeCSV(volvoCPdf)
-
-#To get the Mean, SD, Linear Regression Formula, R-Value, T-Value, and P-value
-myforddata <- read.table("makefordFCCP.txt",header = TRUE,stringsAsFactors = FALSE)
-mycadillacdata <- read.table("makecadillacFCCP.txt",header = TRUE,stringsAsFactors = FALSE)
-mymercedesdata <- read.table("makemercedesFCCP.txt",header = TRUE,stringsAsFactors = FALSE)
-myvolvodata <- read.table("makevolvoFCCP.txt",header = TRUE,stringsAsFactors = FALSE)
-
-#FORD
-summary(myforddata)
-sd(myforddata$MakeCPofTC)
-sd(myforddata$MakeFCofTC)
-lm(myforddata)
-#Intercept: 1.5035 MakeFCofTC: -0.1891
-asex <- lm(myforddata)
-summary(asex)
-
-#CADILLAC
-summary(mycadillacdata)
-sd(mycadillacdata$MakeCPofTC)
-sd(mycadillacdata$MakeFCofTC)
-lm(mycadillacdata)
-#Intercept: -0.004785 MakeFCofTC: 0.03477
-asex <- lm(mycadillacdata)
-summary(asex)
-
-#MERCEDES
-summary(mymercedesdata)
-sd(mymercedesdata$MakeCPofTC)
-sd(mymercedesdata$MakeFCofTC)
-lm(mymercedesdata)
-#Intercept: 0.0504 MakeFCofTC: -0.05505
-asex <- lm(mymercedesdata)
-summary(asex)
-
-#VOLVO
-summary(myvolvodata)
-sd(myvolvodata$MakeCPofTC)
-sd(myvolvodata$MakeFCofTC)
-lm(myvolvodata)
-#Intercept: -0.007633 MakeFCofTC: 0.125155
-asex <- lm(myvolvodata)
-summary(asex)
-
-
-MakeFCandCPplots <- function(makename) {
-  #makename = "Ford" or "Cadillac" etc.
-  mn <- makename
-  if(mn == "Ford"){
-    mydata <- read.table("makefordfull.txt",header = TRUE,stringsAsFactors = FALSE)
-  } else{
-    if(mn == "Cadillac"){
-      mydata <- read.table("makecadillacfull.txt",header = TRUE,stringsAsFactors = FALSE)
-    } else {
-      if(mn == "Mercedes"){
-        mydata <- read.table("makemercedesfull.txt",header = TRUE,stringsAsFactors = FALSE)
-      } else {
-        mydata <- read.table("makevolvofull.txt",header = TRUE,stringsAsFactors = FALSE)
-      }
-    }
-  }
-
-  par(mfrow=c(2,1),mar=c(5.5,4,4,2)+0.1)
-  x = mydata$caseYear
-  xmin = min(mydata$caseYear)
-  xmax = max(mydata$caseYear)
-  ymin2 = min(mydata$MakeFCofTC)
-  ymax2 = max(mydata$MakeFCofTC)
-  y2 = mydata$MakeFCofTC
-
-  plot(x,y2, type = "o", main = "Cases with Fatalities in Vehicle (%)",sub = makename, xlab = "Case Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
-       ylim = c(ymin2, ymax2))
-  
-  y1 = mydata$MakeCPofTC
-  ymin1 = min(mydata$MakeCPofTC) - 0.10
-  ymax1 = max(mydata$MakeCPofTC) + 0.10
-  plot(x,y1, type = "o", main = "Cases with Cell Phone Usage (%)", sub = makename,xlab = "Case Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
-}
-MakeFCandCPplots("Ford")
-MakeFCandCPplots("Cadillac")
-MakeFCandCPplots("Mercedes")
-MakeFCandCPplots("Volvo")
-
-
-MakeFCCPplot <- function(){
-
-  
-  par(mfrow = c(2,2))
-  #Ford
-  x1 = myforddata$MakeCPofTC
-  y1 = myforddata$MakeFCofTC
-  xmin1 = min(myforddata$MakeCPofTC)
-  xmax1 = max(myforddata$MakeCPofTC)
-  ymin1 = min(myforddata$MakeFCofTC)
-  ymax1 = max(myforddata$MakeFCofTC)
-  
-  plot(x1,y1,main = "Ford", 
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin1,xmax1),
-       ylim = c(ymin1, ymax1))
-  abline(lm(y1~x1),col="red")
-  lines(lowess(x1,y1),col="blue")
-  
-  #Cadillac
-  x2 = mycadillacdata$MakeCPofTC
-  y2 = mycadillacdata$MakeFCofTC
-  xmin2 = min(mycadillacdata$MakeCPofTC)
-  xmax2 = max(mycadillacdata$MakeCPofTC)
-  ymin2 = min(mycadillacdata$MakeFCofTC)
-  ymax2 = max(mycadillacdata$MakeFCofTC)
-  
-  plot(x2,y2,main = "Cadillac", 
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin2,xmax2),
-       ylim = c(ymin2, ymax2))
-  abline(lm(y2~x2),col="red")
-  lines(lowess(x2,y2),col="blue")
-  
-  #Mercedes
-  x3 = mymercedesdata$MakeCPofTC
-  y3 = mymercedesdata$MakeFCofTC
-  xmin3 = min(mymercedesdata$MakeCPofTC)
-  xmax3 = max(mymercedesdata$MakeCPofTC)
-  ymin3 = min(mymercedesdata$MakeFCofTC)
-  ymax3 = max(mymercedesdata$MakeFCofTC)
-  
-  plot(x3,y3,main = "Mercedes", 
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin3,xmax3),
-       ylim = c(ymin3, ymax3))
-  abline(lm(y3~x3),col="red")
-  lines(lowess(x3,y3),col="blue")
-  
-  #Volvo
-  x4 = myvolvodata$MakeCPofTC
-  y4 = myvolvodata$MakeFCofTC
-  xmin4 = min(myvolvodata$MakeCPofTC)
-  xmax4 = max(myvolvodata$MakeCPofTC)
-  ymin4 = min(myvolvodata$MakeFCofTC)
-  ymax4 = max(myvolvodata$MakeFCofTC)
-  
-  plot(x4,y4,main = "Volvo", 
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin4,xmax4),
-       ylim = c(ymin4, ymax4))
-  abline(lm(y4~x4),col="red")
-  lines(lowess(x4,y4),col="blue")
-}
-MakeFCCPplot()
-
-
-# CELL PHONE ANALYSIS BY LOCATION -----------------------------------------
-#STATES AND YEARS FOR CAMPAIGNS:
-# NY and CT 2009
-# Nationwide 2014
-
-#State Table
-statenumb <- c(1,2,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,47,48,49,50,51,53,54,55,56)
-#removes Puerto Rico and Virgin Islands
-stateabbFARS <- c("AL","AK","AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS","KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT","NE", "NV", "NH", "NJ", "NM", "NY","NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY")
-
-statetable <- as.data.frame(cbind(as.numeric(statenumb),as.character(stateabbFARS)), stringsAsFactors = FALSE)
-colnames(statetable) <- c("statenum","stateabbFARS")
-statetable$statenum <- as.numeric(statetable$statenum)
-statetable$stateabbFARS <- as.character(statetable$stateabbFARS)
-
-#Counting Cases by State (TotalCasesByState)
-countOfCasesByState <- function(df) {
-  #df = fatal_YY
   dfs <- df
-  year <- unique(dfs$year)
-  caseYear = numeric()
-  statename = character()
-  statenum = numeric()
+  dfs$makenump <- ifelse(dfs$make == mn, 1, 0)
+  dfs <- dfs[dfs$makenump != 0, ]
+  modelYear = numeric()
   totalCases = numeric()
   listcount <- 1
-  for(i in statenumb){
-    caseYear[listcount] <- year
-    statename[listcount] <- stateabbFARS[listcount]
-    statenum[listcount] <- i
+  for(i in modelyearList){
+    modelYear[listcount] <- i
     addingToTable <- function(i){
       dfn <- dfs
-      dfn$statenumbp <- ifelse(df$statenum == i, 1, 0)
-      dfn <- dfn[dfn$statenumbp != 0, ]
+      dfn$modelyrP <- ifelse(dfn$modelyr == i, 1, 0)
+      dfn <- dfn[dfn$modelyrP != 0, ]
       dft <- as.data.frame(cbind.data.frame(dfn$casenum, dfn$statenum), 
-                              header = TRUE, as.is = TRUE)
+                           header = TRUE, as.is = TRUE)
       colnames(dft) <- c("casenum", "statenum")
       dft <- unique(dft)
+      
       casetotalsum <- 0
       x <- count(dft)
       casetotalsum <- sum(x$freq)
@@ -763,283 +526,482 @@ countOfCasesByState <- function(df) {
     totalCases[listcount] <- addingToTable(i)
     listcount = listcount + 1
   }
-  dfstate <- data.frame(caseYear,statename,statenum,totalCases, stringsAsFactors = FALSE)
-  return(dfstate)
+  dfmy <- data.frame(modelYear,totalCases, stringsAsFactors = FALSE)
+  return(dfmy)
 }
 
-countOfDisCasesByState <- function(df, YY) {
+#Count of Cases with CP for Each Make by Model Year
+#INPUT: df = fatal_YY makenum = Make number
+#OUTPUT: data frame with count of distracted driving cases by model year
+countOfDisCasesMakeByMY <- function(df, makenum) {
   #df = fatal_YY
-  fataldisYY <- findingCellCases(df, YY)
+  
+  fataldisYY <- df[df$drf != 0, ]
   #dfn is the new dataframe
   dfn <- fataldisYY
-  year <- unique(dfn$year)
-  caseYear = numeric()
-  statename = character()
-  statenum = numeric()
-  StateCP = numeric()
+  modelyearList <- unique(df$modelyr)
+  mn <- makenum
+  dfn$makenump <- ifelse(dfn$make == mn, 1, 0)
+  dfn <- dfn[dfn$makenump != 0, ]
+  modelYear = numeric()
+  modelYearCellPhone = numeric()
   listcount <- 1
-  for(i in statenumb){
-    caseYear[listcount] <- year
-    statename[listcount] <- stateabbFARS[listcount]
-    statenum[listcount] <- i
+  for(i in modelyearList){
+    modelYear[listcount] <- i
     addingToTable <- function(i){
       dfs <- dfn
-      dfs$statenumbp <- ifelse(dfn$statenum == i, 1, 0)
-      dfs <- dfs[dfs$statenumbp != 0, ]
+      dfs$modelyrP <- ifelse(dfn$modelyr == i, 1, 0)
+      dfs <- dfs[dfs$modelyrP != 0, ]
       dft <- as.data.frame(cbind.data.frame(dfs$casenum, dfs$statenum), 
                            header = TRUE, as.is = TRUE)
       colnames(dft) <- c("casenum", "statenum")
+      dft <- unique(dft)
+      
+      casetotalsum <- 0
+      x <- count(dft)
+      casetotalsum <- sum(x$freq)
+      return(casetotalsum)
+    }
+    modelYearCellPhone[listcount] <- addingToTable(i)
+    listcount = listcount + 1
+  }
+  dfmy <- data.frame(modelYear,modelYearCellPhone, stringsAsFactors = FALSE)
+  return(dfmy)
+}
+
+#Counting Fatalities in Vehicle cases by Make and MY
+#INPUT: df = fatal_YY makenum = Make number
+#OUTPUT: data frame with count of cases with fatalities in vehicles by model year 
+countingFatalMakeInCarsByMY <- function(df, makenum) {
+  #df = fatal_YY
+  mn <- makenum
+  modelyearList <- unique(df$modelyr)
+  df$makenump <- ifelse(df$make == mn, 1, 0)
+  df <- df[df$makenump != 0, ]
+  dfn <- df[df$numfatalveh != 0,]
+  
+  modelYear = numeric()
+  modelYearFatalVeh = numeric()
+  listcount <- 1
+  for(i in modelyearList){
+    modelYear[listcount] <- i
+    addingToTable <- function(i){
+      dfs <- dfn
+      dfs$modelyrP <- ifelse(dfn$modelyr == i, 1, 0)
+      dfs <- dfs[dfs$modelyrP != 0, ]
+      
+      dft <- as.data.frame(cbind.data.frame(dfs$casenum, dfs$statenum), 
+                           header = TRUE, as.is = TRUE)
+      colnames(dft) <- c("casenum", "statenum")
+      
       dft <- unique(dft)
       casetotalsum <- 0
       x <- count(dft)
       casetotalsum <- sum(x$freq)
       return(casetotalsum)
     }
-    StateCP[listcount] <- addingToTable(i)
+    modelYearFatalVeh[listcount] <- addingToTable(i)
     listcount = listcount + 1
   }
-  dfstate <- data.frame(caseYear,statename,statenum,StateCP, stringsAsFactors = FALSE)
-  return(dfstate)
+  dfmy <- data.frame(modelYear,modelYearFatalVeh, stringsAsFactors = FALSE)
+  return(dfmy)
 }
 
-
-creatingCaseTotalByStatedf <- function(df, YY) {
-  #df = fatal_YY
-  #YY = year
-  df1 <- df
+#Dataframe of Make
+#INPUT:makenum = Make number
+#OUTPUT: combined data frame of counts of cases by model number
+makingMakedf <- function(makenum){
+  mn <- makenum
+  #fatalities in vehicle cases
+  combinedFatalVehdf <- function(){
+    df07 <- countingFatalMakeInCarsByMY(fatal_07, mn)
+    df08 <- countingFatalMakeInCarsByMY(fatal_08, mn)
+    df09 <- countingFatalMakeInCarsByMY(fatal_09, mn)
+    df10 <- countingFatalMakeInCarsByMY(fatal_10, mn)
+    df11 <- countingFatalMakeInCarsByMY(fatal_11, mn)
+    df12 <- countingFatalMakeInCarsByMY(fatal_12, mn)
+    df13 <- countingFatalMakeInCarsByMY(fatal_13, mn)
+    df14 <- countingFatalMakeInCarsByMY(fatal_14, mn)
+    df15 <- countingFatalMakeInCarsByMY(fatal_15, mn)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
+  }
+  numFatalVehdf <- combinedFatalVehdf()
+  modelyear <- sort(unique(numFatalVehdf$modelYear))
+  fatalVehTotal <- as.vector(tapply(numFatalVehdf$modelYearFatalVeh, numFatalVehdf$modelYear, sum))
+  casedf <- data.frame(list(modelYear = modelyear, fatalVehTotal = fatalVehTotal), stringsAsFactors = FALSE)
+  casedf$fatalVehTotal <- as.integer(casedf$fatalVehTotal)
+  
+  
   
   #cell phone cases
-  numCPdf <- countOfDisCasesByState(df1, YY)
-  casedf <- numCPdf
-  numDistTot <- countOfDisCases(df1, YY)
-  casedf$CPTotal <- numDistTot
-  
-  #total fatal cases for the year
-  numTCdf <- countOfCasesByState(df1)
-  casedf$numStateTC <- numTCdf$totalCases
-  numTotalCase <- countOfCases(df1)
-  casedf$numTotalCase <- numTotalCase
-  
-  # state distracted divided by total distracted (%)
-  casedf$StateCPofTC <- round(((casedf$StateCP/numTotalCase)*100), digits = 4)
-  
-  
-  # state total divided by total cases (%)
-  casedf$StateTCofTC <- round(((casedf$numStateTC/numTotalCase)*100), digits = 4)
-  
-  return(casedf)
-}
-
-#FCvsCP cases by states dataframes
-FCvsCP_07 <- creatingCaseTotalByStatedf(fatal_07,07)
-FCvsCP_08 <- creatingCaseTotalByStatedf(fatal_08,08)
-FCvsCP_09 <- creatingCaseTotalByStatedf(fatal_09,09)
-FCvsCP_10 <- creatingCaseTotalByStatedf(fatal_10,10)
-FCvsCP_11 <- creatingCaseTotalByStatedf(fatal_11,11)
-FCvsCP_12 <- creatingCaseTotalByStatedf(fatal_12,12)
-FCvsCP_13 <- creatingCaseTotalByStatedf(fatal_13,13)
-FCvsCP_14 <- creatingCaseTotalByStatedf(fatal_14,14)
-FCvsCP_15 <- creatingCaseTotalByStatedf(fatal_15,15)
-
-
-
-pullingStatesNYandCT <- function(state){
-  #state = "NY" or "CT"
-  if(state == "CT"){
-    df07 <- FCvsCP_07[7,]
-    df08 <- FCvsCP_08[7,]
-    df09 <- FCvsCP_09[7,]
-    df10 <- FCvsCP_10[7,]
-    df11 <- FCvsCP_11[7,]
-    df12 <- FCvsCP_12[7,]
-    df13 <- FCvsCP_13[7,]
-    df14 <- FCvsCP_14[7,]
-    df15 <- FCvsCP_15[7,]
-  } else {
-    df07 <- FCvsCP_07[33,]
-    df08 <- FCvsCP_08[33,]
-    df09 <- FCvsCP_09[33,]
-    df10 <- FCvsCP_10[33,]
-    df11 <- FCvsCP_11[33,]
-    df12 <- FCvsCP_12[33,]
-    df13 <- FCvsCP_13[33,]
-    df14 <- FCvsCP_14[33,]
-    df15 <- FCvsCP_15[33,]
+  combinedCellPhonedf <- function(){
+    df07 <- countOfDisCasesMakeByMY(fatal_07, mn)
+    df08 <- countOfDisCasesMakeByMY(fatal_08, mn)
+    df09 <- countOfDisCasesMakeByMY(fatal_09, mn)
+    df10 <- countOfDisCasesMakeByMY(fatal_10, mn)
+    df11 <- countOfDisCasesMakeByMY(fatal_11, mn)
+    df12 <- countOfDisCasesMakeByMY(fatal_12, mn)
+    df13 <- countOfDisCasesMakeByMY(fatal_13, mn)
+    df14 <- countOfDisCasesMakeByMY(fatal_14, mn)
+    df15 <- countOfDisCasesMakeByMY(fatal_15, mn)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
   }
-  statedf <- rbind(df07, df08, df09, df10, df11, df12, df13, 
-                  df14, df15)
-  return(statedf)
+  numCellPhonedf <- combinedCellPhonedf()
+  modelyear <- sort(unique(numCellPhonedf$modelYear))
+  cellPhoneTotal <- as.vector(tapply(numCellPhonedf$modelYearCellPhone, numCellPhonedf$modelYear, sum))
+  CPcasedf <- data.frame(list(modelYear = modelyear, cellPhoneTotal = cellPhoneTotal), stringsAsFactors = FALSE)
+  casedf$cellPhoneTotal <- as.integer(CPcasedf$cellPhoneTotal)
+  
+  #total cases 
+  combinedTotalCasesdf <- function(){
+    df07 <- countOfCasesMakeByMY(fatal_07, mn)
+    df08 <- countOfCasesMakeByMY(fatal_08, mn)
+    df09 <- countOfCasesMakeByMY(fatal_09, mn)
+    df10 <- countOfCasesMakeByMY(fatal_10, mn)
+    df11 <- countOfCasesMakeByMY(fatal_11, mn)
+    df12 <- countOfCasesMakeByMY(fatal_12, mn)
+    df13 <- countOfCasesMakeByMY(fatal_13, mn)
+    df14 <- countOfCasesMakeByMY(fatal_14, mn)
+    df15 <- countOfCasesMakeByMY(fatal_15, mn)
+    #combining into one df
+    combineddf <- rbind(df07,df08, df09, df10, df11, df12, df13, 
+                        df14, df15)
+    return(combineddf)
+  }
+  numTotalCasesdf <- combinedTotalCasesdf()
+  modelyear <- sort(unique(numTotalCasesdf$modelYear))
+  TotalCasesMY <- as.vector(tapply(numTotalCasesdf$totalCases, numTotalCasesdf$modelYear, sum))
+  TCcasedf <- data.frame(list(modelYear = modelyear, totalCases = TotalCasesMY), stringsAsFactors = FALSE)
+  casedf$totalCases <- as.integer(TCcasedf$totalCases)
+  
+  #fatal in vehicle divided by total cases (%)
+  FatalVehofTotalCases <- round(((casedf$fatalVehTotal/casedf$totalCases)*100),digits = 4)
+  casedf$FatalVehofTotalCases <- FatalVehofTotalCases
+  # cell phone divided by total cases (%)
+  CellPhoneofTotalCases <- round(((casedf$cellPhoneTotal/casedf$totalCases)*100), digits = 4)
+  casedf$CellPhoneofTotalCases <- CellPhoneofTotalCases
+  
+  
+  ndf <- as.data.frame(cbind(casedf$modelYear, casedf$fatalVehTotal,casedf$cellPhoneTotal,
+                             casedf$totalCases,casedf$FatalVehofTotalCases,casedf$CellPhoneofTotalCases), 
+                       header = TRUE, as.is = TRUE, stringsAsFactors = FALSE)
+  colnames(ndf) <- c("modelYear", "fatalVehTotal", "cellPhoneTotal", "totalCases",
+                     "FatalVehofTotalCases","CellPhoneofTotalCases")
+  ndf$modelYear <- casedf$modelYear 
+  ndf$fatalVehTotal <- casedf$fatalVehTotal
+  ndf$cellPhoneTotal <- casedf$cellPhoneTotal
+  ndf$totalCases <- casedf$totalCases
+  ndf$FatalVehofTotalCases <- casedf$FatalVehofTotalCases
+  ndf$CellPhoneofTotalCases <- casedf$CellPhoneofTotalCases
+  return(ndf)
 }
 
-ctCPdf <- pullingStatesNYandCT("CT")
-nyCPdf <- pullingStatesNYandCT("NY")
+#for Ford (FARS Code 12)
+fordMakedf <- makingMakedf(12)
 
-#Table CSV stateCPdf To Paste into .txt File to Paste into Word for Table
-#Function for making and saving stateCPdf Table 
-#INPUT: df = ctCPdf or nyCPdf
+#for Cadillac (FARS Code 19)
+cadillacMakedf <- makingMakedf(19)
+cadillacMakedf[is.na(cadillacMakedf)] <- 0
+
+#for Mercedes-Benz (FARS Code 42)
+mercedesMakedf <- makingMakedf(42)
+
+#for Volvo (FARS Code 51)
+volvoMakedf <- makingMakedf(51)
+volvoMakedf[is.na(volvoMakedf)] <- 0
+
+#Table CSV makeCPdf To Paste into .txt File to Paste into Word for Table
+#Function for making and saving makedisdf Table 
+#INPUT: df = makeCPdf
 #OUTPUT: saved .CSV file of table
-tableToCTorNYYearCSV <- function(df) {
-  #df = ctCPdf or nyCPdf
+tableToMakeCSV <- function(df) {
+  #df = makeMakedf
   row.names(df)<- NULL
-  colnames(df) <- c("caseYear","stateName", "stateNum"
-                    ,"StateCP", "CPTotal",
-                    "StateTC", 
-                    "TotalCase(CP)","StateCPofTC","StateTCofTC")
-  write.csv(df, file = "nyFCvsCP.csv")
+  colnames(df) <- c("modelYear", "fatalVehTotal", "cellPhoneTotal", "totalCases",
+                    "FatalVehofTotalCases","CellPhoneofTotalCases")
+  write.csv(df, file = "makevolvo.csv")
 }
-#tableToCTorNYYearCSV(ctCPdf)
-tableToCTorNYYearCSV(nyCPdf)
+tableToMakeCSV(volvoMakedf)
 
-plotCTandLR <- function(){
-  par(mfrow=c(2,1),mar=c(5.5,4,4,2)+0.1)
-  x = ctCPdf$caseYear
-  xmin = min(ctCPdf$caseYear)
-  xmax = max(ctCPdf$caseYear)
-  ymin1 = min(ctCPdf$StateCPofTC) 
-  ymax1 = max(ctCPdf$StateCPofTC)+ 0.005
-  y1 = ctCPdf$StateCPofTC
+
+#FORD
+Fordplot <- function() {
+  mydata <- fordMakedf
+  par(mfrow=c(2,1))
+  x = mydata$modelYear
+  xmin = min(mydata$modelYear)
+  xmax = max(mydata$modelYear)
   
-  plot(x,y1, type = "o", 
-       main = "Cases with Cell Phone Usage (%)",
-       sub = "CT", xlab = "Case Year", 
-       ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
+  y1 = mydata$CellPhoneofTotalCases
+  ymin1 = min(mydata$CellPhoneofTotalCases) 
+  ymax1 = max(mydata$CellPhoneofTotalCases) + 0.2
   
-  x2 = ctCPdf$StateCPofTC
-  y2 = ctCPdf$StateTCofTC
-  xmin2 = min(ctCPdf$StateCPofTC)
-  xmax2 = max(ctCPdf$StateCPofTC)
-  ymin2 = min(ctCPdf$StateTCofTC)
-  ymax2 = max(ctCPdf$StateTCofTC)
+  ymin2 = min(mydata$FatalVehofTotalCases)-1
+  ymax2 = max(mydata$FatalVehofTotalCases)+1.5
+  y2 = mydata$FatalVehofTotalCases
   
-  plot(x2,y2,main = "Cell Phones vs. Total Cases", 
-       sub = "CT",
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Total Cases (%)", xlim = c(xmin2,xmax2),
-       ylim = c(ymin2, ymax2))
-  abline(lm(y2~x2),col="red")
-  lines(lowess(x2,y2),col="blue")
+  plot(x,y2, main = "A) Ford Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+       ylim = c(ymin2, ymax2), col = "mediumblue")
+  lines(x, y2, type = "h", col = "mediumblue")
+  
+  plot(x,y1, main = "B) Ford Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+       ylim = c(ymin1, ymax1), col = "darkviolet")
+  lines(x, y1, type = "h", col = "darkviolet")
+  
 }
-plotCTandLR()
+Fordplot()
 
-plotNYandLR <- function(){
-  par(mfrow=c(2,1),mar=c(5.5,4,4,2)+0.1)
-  x = nyCPdf$caseYear
-  xmin = min(nyCPdf$caseYear)
-  xmax = max(nyCPdf$caseYear)
-  y1 = nyCPdf$StateCPofTC
-  ymin1 = min(nyCPdf$StateCPofTC)
-  ymax1 = max(nyCPdf$StateCPofTC)+ 0.005
-  plot(x,y1, type = "o", 
-       main = "Cases with Cell Phone Usage (%)", 
-       sub = "NY",xlab = "Case Year", 
-       ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
+#TECHNOLOGY T-TEST
+FordFatalVehTtest <- function(df){
+  #df = fordMakedf
+  before11 <- subset(df, modelYear < 2011, select = FatalVehofTotalCases)
   
-  x2 = nyCPdf$StateCPofTC
-  y2 = nyCPdf$StateTCofTC
-  xmin2 = min(nyCPdf$StateCPofTC)
-  xmax2 = max(nyCPdf$StateCPofTC)
-  ymin2 = min(nyCPdf$StateTCofTC)
-  ymax2 = max(nyCPdf$StateTCofTC)
-  
-  plot(x2,y2,main = "Cell Phones vs. Total Cases", 
-       sub = "NY",
-       xlab = "Cell Phone Cases (%)",
-       ylab ="Total Cases (%)", xlim = c(xmin2,xmax2),
-       ylim = c(ymin2, ymax2))
-  abline(lm(y2~x2),col="red")
-  lines(lowess(x2,y2),col="blue")
+  after11 <- subset(df, modelYear > 2011, select = FatalVehofTotalCases)
+  print(sd(before11$FatalVehofTotalCases))
+  print(sd(after11$FatalVehofTotalCases))
+  ttest <- t.test(before11,after11)
+  return(ttest)
 }
-plotNYandLR()
+FordFatalVehTtest(fordMakedf)
 
-#To get the Mean, SD, Linear Regression Formula, R-Value, T-Value, and P-value
-myctdata <- read.table("ctCPvsTCsingle.txt",header = TRUE,stringsAsFactors = FALSE)
-mynydata <- read.table("nyCPvsTCsingle.txt",header = TRUE,stringsAsFactors = FALSE)
-
-#CT
-summary(myctdata)
-sd(myctdata$StateCPofTC)
-sd(myctdata$StateTCofTC)
-lm(myctdata)
-#Intercept: 0.00977 StateTCofTC: -0.006055
-asex <- lm(myctdata)
-summary(asex)
-
-#NY
-summary(mynydata)
-sd(mynydata$StateCPofTC)
-sd(mynydata$StateTCofTC)
-lm(mynydata)
-#Intercept: -0.02300 StateTCofTC: 0.007711
-asex <- lm(mynydata)
-summary(asex)
-
-
-creatingAveragesForNationwide <- function(){
-  creatingAveragesdf <- function(df) {
-    #df = FCvsCP_YY
-    caseYear <- unique(df$caseYear)
-    AverageCP = numeric()
-    CPTotal <- unique(df$CPTotal)
-    TCTotal <- unique(df$numTotalCase)
-    AverageCPofTC = numeric()
+#FORD CELL PHONE T-TEST
+FordCellPhoneTtest <- function(df, MY){
+  #df = fordMakedf
+  #MY = model year break. either 2010 or 2013
+  if(MY == 2010){
+    before10 <- subset(df, modelYear < 2010, select = CellPhoneofTotalCases)
     
-    #cell phone cases
-    numCPdf <- df$StateCP
-    cpsum <- 0
-    for(i in numCPdf){
-      cpsum <- cpsum + i
-    }
-    AverageCP <- round((cpsum)/51, digits = 4)
-    AverageCPofTC <- round((AverageCP/TCTotal)*100,digits = 4)
-    ndf <- data.frame(caseYear,AverageCP,CPTotal,TCTotal,AverageCPofTC)
-    return(ndf)
+    after10 <- subset(df, modelYear > 2010, select = CellPhoneofTotalCases)
+    print(sd(before10$CellPhoneofTotalCases))
+    print(sd(after10$CellPhoneofTotalCases))
+    ttest <- t.test(before10,after10)
+  } else {
+    before13 <- subset(df, modelYear < 2013, select = CellPhoneofTotalCases)
+    after13 <- subset(df, modelYear > 2013, select = CellPhoneofTotalCases)
+    print(sd(before13$CellPhoneofTotalCases))
+    print(sd(after13$CellPhoneofTotalCases))
+    ttest <- t.test(before13,after13)
+    
   }
-  df07 <- creatingAveragesdf(FCvsCP_07)
-  df08 <- creatingAveragesdf(FCvsCP_08)
-  df09 <- creatingAveragesdf(FCvsCP_09)
-  df10 <- creatingAveragesdf(FCvsCP_10)
-  df11 <- creatingAveragesdf(FCvsCP_11)
-  df12 <- creatingAveragesdf(FCvsCP_12)
-  df13 <- creatingAveragesdf(FCvsCP_13)
-  df14 <- creatingAveragesdf(FCvsCP_14)
-  df15 <- creatingAveragesdf(FCvsCP_15)
-  statedf <- rbind(df07, df08, df09, df10, df11, df12, df13, 
-                   df14, df15)
-  return(statedf)
+  return(ttest)
 }
-nationwideCPdf <- creatingAveragesForNationwide()
+FordCellPhoneTtest(fordMakedf, 2010)
+FordCellPhoneTtest(fordMakedf, 2013)
 
-#Table CSV nationwideCPdf To Paste into .txt File to Paste into Word for Table
-#Function for making and saving stateCPdf Table 
-#INPUT: df = nationwideCPdf
-#OUTPUT: saved .CSV file of table
-tableToNationwideCSV <- function(df) {
-  #df = nationwideCPdf
-  row.names(df)<- NULL
-  colnames(df) <- c("caseYear","AverageCP", "CPTotal",
-                    "TCTotal", 
-                    "AverageCPofTC")
-  write.csv(df, file = "nationwideCP.csv")
-}
-tableToNationwideCSV(nationwideCPdf)
-
-plotNationwideandLR <- function(){
-  par(mfrow=c(1,1),mar=c(5.5,4,4,2)+0.1)
-  x = nationwideCPdf$caseYear
-  xmin = min(nationwideCPdf$caseYear)
-  xmax = max(nationwideCPdf$caseYear)
-  ymin1 = min(nationwideCPdf$AverageCPofTC) 
-  ymax1 = max(nationwideCPdf$AverageCPofTC)+ 0.005
-  y1 = nationwideCPdf$AverageCPofTC
+#CADILLAC
+Cadillacplot <- function() {
+  mydata <- cadillacMakedf
+  par(mfrow=c(2,1))
+  x = mydata$modelYear
+  xmin = min(mydata$modelYear)
+  xmax = max(mydata$modelYear)
   
-  plot(x,y1, type = "o", 
-       main = "Cases with Cell Phone Usage (%)",
-       xlab = "Case Year", 
-       ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
-       ylim = c(ymin1, ymax1))
-  abline(lm(y1~x),col="red")
-  lines(lowess(x,y1),col="blue")
+  y1 = mydata$CellPhoneofTotalCases
+  ymin1 = min(mydata$CellPhoneofTotalCases) - 0.1
+  ymax1 = max(mydata$CellPhoneofTotalCases) + 0.2
+  
+  ymin2 = min(mydata$FatalVehofTotalCases)-0.1
+  ymax2 = max(mydata$FatalVehofTotalCases)+1
+  y2 = mydata$FatalVehofTotalCases
+  
+  plot(x,y2, main = "A) Cadillac Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+       ylim = c(ymin2, ymax2), col = "mediumblue")
+  lines(x, y2, type = "h", col = "mediumblue")
+  
+  plot(x,y1, main = "B) Cadillac Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+       ylim = c(ymin1, ymax1), col = "darkviolet")
+  lines(x, y1, type = "h", col = "darkviolet")
+  
 }
-plotNationwideandLR()
+Cadillacplot()
+
+#TECHNOLOGY T-TEST
+CadillacFatalVehTtest <- function(df, MY){
+  #df = cadillacMakedf
+  if(MY == 2011){
+    before11 <- subset(df, modelYear < 2011, select = FatalVehofTotalCases)
+    after11 <- subset(df, modelYear > 2011, select = FatalVehofTotalCases)
+    print(sd(before11$FatalVehofTotalCases))
+    print(sd(after11$FatalVehofTotalCases))
+    ttest <- t.test(before11,after11)
+  } else {
+    if(MY == 2012) {
+      before12 <- subset(df, modelYear < 2012, select = FatalVehofTotalCases)
+      after12 <- subset(df, modelYear > 2012, select = FatalVehofTotalCases)
+      print(sd(before12$FatalVehofTotalCases))
+      print(sd(after12$FatalVehofTotalCases))
+      ttest <- t.test(before12,after12)
+    } else {
+      before13 <- subset(df, modelYear < 2013, select = FatalVehofTotalCases)
+      after13 <- subset(df, modelYear > 2013, select = FatalVehofTotalCases)
+      print(sd(before13$FatalVehofTotalCases))
+      print(sd(after13$FatalVehofTotalCases))
+      ttest <- t.test(before13,after13)
+    }
+  }
+  return(ttest)
+}
+CadillacFatalVehTtest(cadillacMakedf, 2011)
+CadillacFatalVehTtest(cadillacMakedf, 2012)
+CadillacFatalVehTtest(cadillacMakedf, 2013)
+
+#CADILLAC CELL PHONE T-TEST
+CadillacCellPhoneTtest <- function(df, MY){
+  #df = cadillacMakedf
+  #MY = model year, either 2011 or 2013
+  if(MY == 2011){
+    before11 <- subset(df, modelYear < 2011, select = CellPhoneofTotalCases)
+    after11 <- subset(df, modelYear > 2011, select = CellPhoneofTotalCases)
+    print(sd(before11$CellPhoneofTotalCases))
+    print(sd(after11$CellPhoneofTotalCases))
+    ttest <- t.test(before11,after11)
+  } else {
+    before13 <- subset(df, modelYear < 2013, select = CellPhoneofTotalCases)
+    after13 <- subset(df, modelYear > 2013, select = CellPhoneofTotalCases)
+    print(sd(before13$CellPhoneofTotalCases))
+    print(sd(after13$CellPhoneofTotalCases))
+    ttest <- t.test(before13,after13)
+  }
+  
+  return(ttest)
+}
+CadillacCellPhoneTtest(cadillacMakedf, 2011)
+CadillacCellPhoneTtest(cadillacMakedf, 2013)
+
+
+#MERCEDES
+Mercedesplot <- function() {
+  mydata <- mercedesMakedf
+  par(mfrow=c(2,1))
+  x = mydata$modelYear
+  xmin = min(mydata$modelYear)
+  xmax = max(mydata$modelYear)
+  
+  y1 = mydata$CellPhoneofTotalCases
+  ymin1 = min(mydata$CellPhoneofTotalCases) - 0.1
+  ymax1 = max(mydata$CellPhoneofTotalCases) + 0.2
+  
+  ymin2 = min(mydata$FatalVehofTotalCases)-0.1
+  ymax2 = max(mydata$FatalVehofTotalCases)+1
+  y2 = mydata$FatalVehofTotalCases
+  
+  plot(x,y2, main = "A) Mercedes Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+       ylim = c(ymin2, ymax2), col = "mediumblue")
+  lines(x, y2, type = "h", col = "mediumblue")
+  
+  plot(x,y1, main = "B) Mercedes Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+       ylim = c(ymin1, ymax1), col = "darkviolet")
+  lines(x, y1, type = "h", col = "darkviolet")
+  
+}
+Mercedesplot()
+
+#TECHNOLOGY T-TEST
+MercedesFatalVehTtest <- function(df, MY){
+  #df = mercedesMakedf
+  #MY = model year, either 2010 or 2013
+  if(MY == 2010){
+    before10 <- subset(df, modelYear < 2010, select = FatalVehofTotalCases)
+    after10 <- subset(df, modelYear > 2010, select = FatalVehofTotalCases)
+    print(sd(before10$FatalVehofTotalCases))
+    print(sd(after10$FatalVehofTotalCases))
+    ttest <- t.test(before10,after10)
+  } else {
+    before13 <- subset(df, modelYear < 2013, select = FatalVehofTotalCases)
+    
+    after13 <- subset(df, modelYear > 2013, select = FatalVehofTotalCases)
+    print(sd(before13$FatalVehofTotalCases))
+    print(sd(after13$FatalVehofTotalCases))
+    ttest <- t.test(before13,after13)
+  }
+  
+  return(ttest)
+}
+MercedesFatalVehTtest(mercedesMakedf, 2010)
+MercedesFatalVehTtest(mercedesMakedf, 2013)
+
+#MERCEDES CELL PHONE T-TEST
+MercedesCellPhoneTtest <- function(df, MY){
+  #df = mercedesMakedf
+  if(MY == 2010){
+    before10 <- subset(df, modelYear < 2010, select = CellPhoneofTotalCases)
+    after10 <- subset(df, modelYear > 2010, select = CellPhoneofTotalCases)
+    print(sd(before10$CellPhoneofTotalCases))
+    print(sd(after10$CellPhoneofTotalCases))
+    ttest <- t.test(before10,after10)
+  } else {
+    before14 <- subset(df, modelYear < 2014, select = CellPhoneofTotalCases)
+    after14 <- subset(df, modelYear > 2014, select = CellPhoneofTotalCases)
+    print(sd(before14$CellPhoneofTotalCases))
+    print(sd(after14$CellPhoneofTotalCases))
+    ttest <- t.test(before14,after14)
+  }
+  
+  return(ttest)
+}
+MercedesCellPhoneTtest(mercedesMakedf, 2010)
+MercedesCellPhoneTtest(mercedesMakedf, 2014)
+
+#VOLVO
+Volvoplot <- function() {
+  mydata <- volvoMakedf
+  par(mfrow=c(2,1))
+  x = mydata$modelYear
+  xmin = min(mydata$modelYear)
+  xmax = max(mydata$modelYear)
+  
+  y1 = mydata$CellPhoneofTotalCases
+  ymin1 = min(mydata$CellPhoneofTotalCases) - 0.1
+  ymax1 = max(mydata$CellPhoneofTotalCases) + 0.2
+  
+  ymin2 = min(mydata$FatalVehofTotalCases)-0.1
+  ymax2 = max(mydata$FatalVehofTotalCases)+1
+  y2 = mydata$FatalVehofTotalCases
+  
+  plot(x,y2, main = "A) Volvo Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+       ylim = c(ymin2, ymax2), col = "mediumblue")
+  lines(x, y2, type = "h", col = "mediumblue")
+  
+  plot(x,y1, main = "B) Volvo Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+       ylim = c(ymin1, ymax1), col = "darkviolet")
+  lines(x, y1, type = "h", col = "darkviolet")
+  
+}
+Volvoplot()
+
+#TECHNOLOGY T-TEST
+VolvoFatalVehTtest <- function(df, MY){
+  #df = volvoMakedf
+  if(MY == 2010){
+    before10 <- subset(df, modelYear < 2010, select = FatalVehofTotalCases)
+    after10 <- subset(df, modelYear > 2010, select = FatalVehofTotalCases)
+    print(sd(before10$FatalVehofTotalCases))
+    print(sd(after10$FatalVehofTotalCases))
+    ttest <- t.test(before10,after10)
+  } else {
+    if(MY == 2012) {
+      before12 <- subset(df, modelYear < 2012, select = FatalVehofTotalCases)
+      after12 <- subset(df, modelYear > 2012, select = FatalVehofTotalCases)
+      print(sd(before12$FatalVehofTotalCases))
+      print(sd(after12$FatalVehofTotalCases))
+      ttest <- t.test(before12,after12)
+    } else {
+      before14 <- subset(df, modelYear < 2014, select = FatalVehofTotalCases)
+      after14 <- subset(df, modelYear > 2014, select = FatalVehofTotalCases)
+      print(sd(before14$FatalVehofTotalCases))
+      print(sd(after14$FatalVehofTotalCases))
+      ttest <- t.test(before14,after14)
+    }
+  }
+  return(ttest)
+}
+
+VolvoFatalVehTtest(volvoMakedf, 2010)
+VolvoFatalVehTtest(volvoMakedf, 2012)
+VolvoFatalVehTtest(volvoMakedf, 2014)
