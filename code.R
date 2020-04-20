@@ -316,6 +316,7 @@ makingNHTSAdf <- function(){
     return(combineddf)
   }
   numFatalVehdf <- combinedFatalVehdf()
+  #print(numFatalVehdf)
   modelyear <- sort(unique(numFatalVehdf$modelYear))
   fatalVehTotal <- as.vector(tapply(numFatalVehdf$modelYearFatalVeh, numFatalVehdf$modelYear, sum))
   casedf <- data.frame(list(modelYear = modelyear, fatalVehTotal = fatalVehTotal), stringsAsFactors = FALSE)
@@ -340,6 +341,7 @@ makingNHTSAdf <- function(){
   }
   #adding cell phone data frame into main combined data frame
   numCellPhonedf <- combinedCellPhonedf()
+  #print(numCellPhonedf)
   modelyear <- sort(unique(numCellPhonedf$modelYear))
   cellPhoneTotal <- as.vector(tapply(numCellPhonedf$modelYearCellPhone, numCellPhonedf$modelYear, sum))
   CPcasedf <- data.frame(list(modelYear = modelyear, cellPhoneTotal = cellPhoneTotal), stringsAsFactors = FALSE)
@@ -363,8 +365,10 @@ makingNHTSAdf <- function(){
   }
   #combining into main data frame
   numTotalCasesdf <- combinedTotalCasesdf()
+  #print(numTotalCasesdf)
   modelyear <- sort(unique(numTotalCasesdf$modelYear))
   TotalCasesMY <- as.vector(tapply(numTotalCasesdf$totalCases, numTotalCasesdf$modelYear, sum))
+  
   TCcasedf <- data.frame(list(modelYear = modelyear, totalCases = TotalCasesMY), stringsAsFactors = FALSE)
   casedf$totalCases <- as.integer(TCcasedf$totalCases)
   
@@ -423,11 +427,11 @@ NHTSAplot <- function() {
   ymax2 = max(mydata$FatalVehofTotalCases)+1
   y2 = mydata$FatalVehofTotalCases
   
-  plot(x,y2, main = "Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+  plot(x,y2, main = "A) Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
        ylim = c(ymin2, ymax2), col = "mediumblue")
   lines(x, y2, type = "h", col = "mediumblue")
   
-  plot(x,y1, main = "Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+  plot(x,y1, main = "B) Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
        ylim = c(ymin1, ymax1), col = "darkviolet")
   lines(x, y1, type = "h", col = "darkviolet")
   
@@ -742,11 +746,11 @@ Fordplot <- function() {
   ymax2 = max(mydata$FatalVehofTotalCases)+1.5
   y2 = mydata$FatalVehofTotalCases
   
-  plot(x,y2, main = "Ford Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+  plot(x,y2, main = "A) Ford Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
        ylim = c(ymin2, ymax2), col = "mediumblue")
   lines(x, y2, type = "h", col = "mediumblue")
   
-  plot(x,y1, main = "Ford Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+  plot(x,y1, main = "B) Ford Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
        ylim = c(ymin1, ymax1), col = "darkviolet")
   lines(x, y1, type = "h", col = "darkviolet")
   
@@ -806,11 +810,11 @@ Cadillacplot <- function() {
   ymax2 = max(mydata$FatalVehofTotalCases)+1
   y2 = mydata$FatalVehofTotalCases
   
-  plot(x,y2, main = "Cadillac Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+  plot(x,y2, main = "A) Cadillac Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
        ylim = c(ymin2, ymax2), col = "mediumblue")
   lines(x, y2, type = "h", col = "mediumblue")
   
-  plot(x,y1, main = "Cadillac Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+  plot(x,y1, main = "B) Cadillac Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
        ylim = c(ymin1, ymax1), col = "darkviolet")
   lines(x, y1, type = "h", col = "darkviolet")
   
@@ -887,11 +891,11 @@ Mercedesplot <- function() {
   ymax2 = max(mydata$FatalVehofTotalCases)+1
   y2 = mydata$FatalVehofTotalCases
   
-  plot(x,y2, main = "Mercedes Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+  plot(x,y2, main = "A) Mercedes Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
        ylim = c(ymin2, ymax2), col = "mediumblue")
   lines(x, y2, type = "h", col = "mediumblue")
   
-  plot(x,y1, main = "Mercedes Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+  plot(x,y1, main = "B) Mercedes Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
        ylim = c(ymin1, ymax1), col = "darkviolet")
   lines(x, y1, type = "h", col = "darkviolet")
   
@@ -960,11 +964,11 @@ Volvoplot <- function() {
   ymax2 = max(mydata$FatalVehofTotalCases)+1
   y2 = mydata$FatalVehofTotalCases
   
-  plot(x,y2, main = "Volvo Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
+  plot(x,y2, main = "A) Volvo Cases with Fatalities in Vehicle (%)", xlab = "Model Year", ylab ="Fatalities in Vehicle Cases(%)", xlim = c(xmin, xmax),
        ylim = c(ymin2, ymax2), col = "mediumblue")
   lines(x, y2, type = "h", col = "mediumblue")
   
-  plot(x,y1, main = "Volvo Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
+  plot(x,y1, main = "B) Volvo Cases with Cell Phone Usage (%)", xlab = "Model Year", ylab ="Cell Phone Cases (%)", xlim = c(xmin, xmax),
        ylim = c(ymin1, ymax1), col = "darkviolet")
   lines(x, y1, type = "h", col = "darkviolet")
   
@@ -974,21 +978,30 @@ Volvoplot()
 #TECHNOLOGY T-TEST
 VolvoFatalVehTtest <- function(df, MY){
   #df = volvoMakedf
-  if(MY == 2010) {
+  if(MY == 2010){
     before10 <- subset(df, modelYear < 2010, select = FatalVehofTotalCases)
     after10 <- subset(df, modelYear > 2010, select = FatalVehofTotalCases)
     print(sd(before10$FatalVehofTotalCases))
     print(sd(after10$FatalVehofTotalCases))
     ttest <- t.test(before10,after10)
   } else {
-    before12 <- subset(df, modelYear < 2012, select = FatalVehofTotalCases)
-    after12 <- subset(df, modelYear > 2012, select = FatalVehofTotalCases)
-    print(sd(before12$FatalVehofTotalCases))
-    print(sd(after12$FatalVehofTotalCases))
-    ttest <- t.test(before12,after12)
+    if(MY == 2012) {
+      before12 <- subset(df, modelYear < 2012, select = FatalVehofTotalCases)
+      after12 <- subset(df, modelYear > 2012, select = FatalVehofTotalCases)
+      print(sd(before12$FatalVehofTotalCases))
+      print(sd(after12$FatalVehofTotalCases))
+      ttest <- t.test(before12,after12)
+    } else {
+      before14 <- subset(df, modelYear < 2014, select = FatalVehofTotalCases)
+      after14 <- subset(df, modelYear > 2014, select = FatalVehofTotalCases)
+      print(sd(before14$FatalVehofTotalCases))
+      print(sd(after14$FatalVehofTotalCases))
+      ttest <- t.test(before14,after14)
+    }
   }
-  
   return(ttest)
 }
+
 VolvoFatalVehTtest(volvoMakedf, 2010)
 VolvoFatalVehTtest(volvoMakedf, 2012)
+VolvoFatalVehTtest(volvoMakedf, 2014)
